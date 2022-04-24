@@ -1,0 +1,129 @@
+<html>
+    <head>
+        <title>Movie review segregator</title>
+
+        <meta charset="utf-8">
+        <!-- <link rel="icon" href="../favicon.ico" type="image/gif" sizes="16x16"> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="./static/bootstrap.min.css">
+        <script src="./static/jquery.min.js"></script>
+        <script src="./static/bootstrap.min.js"></script>
+
+        <script src="./static/chart.js"></script>
+
+        <link rel="stylesheet" href="./header.css">
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-4 header-title">Movie review segregator</div>
+                    <div class="col-sm-8">
+                        <div class="navbar">
+                            <!-- <div onclick="changePage(this)" page="training" class="nav-item active">prediction</div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content">
+            <link rel="stylesheet" href="./training.css">
+
+            <center>
+                <p>Enter the imdb review url</p>
+                <input type="text" class="movie_url" /><br />
+                <button onclick="getPredictions()">Get predictions</button>
+            </center>
+
+            <center>
+                <div class="container-fluid trainingProgress">
+                    <div class="placeholder">
+                        <div class="layer">
+                            <div class="layerName">Predictions</div>
+                            <div class="layerDesc">Click on "Get predictions" button to start the prediction</div>
+                        </div>
+                    </div>
+                    <div class="inProgress">
+                        <div class="layer">
+                            <div class="layerName">Predicting...</div>
+                            <img src="./loading.svg" />
+                            <!-- <div class="layerDesc">Predicting...</div> -->
+                        </div>
+                    </div>
+                    <div class="trainingCompleted">
+                        <div class="layer">
+                            <div class="layerName" >Prediction Completed</div>
+                            <canvas class="layerDesc" style="max-width: 260px; max-height: 260px;" id="pieChart" ></canvas>
+                            <!-- <div class="layerDesc">
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </center>
+
+            <center>
+                <h3>Project by</h3>
+                <p>Naga Sandeep Oruganti</p>
+                <p>Abhishek Asawa</p>
+                <p>Ram Kishore</p>
+            </center>
+        </div>
+
+        <script>
+         
+        
+            function getPredictions() {
+         
+
+                console.log("getPredictions", $('.movie_url').val())
+                $('.trainingProgress .placeholder').hide();
+                $('.trainingProgress .trainingCompleted').hide();
+                $('.trainingProgress .inProgress').show();
+                
+                $.ajax({
+                    url: 'http://localhost:7676/get_pred_imdb',
+                    method: "POST",
+                    data: {"movie_review_url": $('.movie_url').val()},
+                    success: (res) => {
+                        console.log(res)
+                        $('.trainingProgress .inProgress').hide();
+                        $('.trainingProgress .placeholder').hide();
+                        $('.trainingProgress .trainingCompleted').show();
+                        // $('.trainingProgress .trainingCompleted .layerDesc').html("Positive: " + res.results[0] + "," + "Negative:" + res.results[1]);
+
+                        const data = {
+                            labels: [
+                                'Positive',
+                                'Negative',
+                            ],
+                            datasets: [{
+                                label: 'My First Dataset',
+                                data: [res.results[0], res.results[1]],
+                                backgroundColor: [
+                                    'rgb(54, 162, 235)',
+                                    'rgb(255, 99, 132)',
+                                ],
+                                hoverOffset: 4
+                            }]
+                        };
+
+                        const config = {
+                            type: 'pie',
+                            data: data,
+                        };
+
+                        var myChart = new Chart(
+                            document.getElementById("pieChart"),
+                            config
+                        );
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
+
+
